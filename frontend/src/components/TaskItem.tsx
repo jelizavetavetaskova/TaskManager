@@ -2,7 +2,7 @@ import type Task from "../types/Task.ts";
 
 type TaskItemProps = {
     task: Task;
-    onToggle: (task: Task) => void;
+    onToggle: (id: number) => Promise<void>;
     onDelete: (id: number) => void
 }
 
@@ -18,7 +18,7 @@ export default function TaskItem({task, onToggle, onDelete}: TaskItemProps) {
                 <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => onToggle(task)}
+                    onChange={() => onToggle(task.id)}
                     className="h-4 w-4 accent-indigo-500"
                 />
 

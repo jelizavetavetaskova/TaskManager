@@ -1,86 +1,44 @@
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import './App.css'
-import type Task from "./types/Task.ts";
-import {createTask, deleteTask, getTasks, updateTask} from "./api/tasks.ts";
 import TaskList from "./components/TaskList.tsx";
 import TaskForm from "./components/TaskForm.tsx";
 import SearchBar from "./components/SearchBar.tsx";
+import TaskFilter from "./components/TaskFilter.tsx";
+import {useTasks} from "./hooks/useTasks.ts";
 
 function App() {
-    const [tasks, setTasks] = useState<Task[]>([]);
     const [title, setTitle] = useState("");
     const [query, setQuery] = useState("");
-    const [error, setError] = useState<string|null>(null);
-    const [loading, setLoading] = useState(false);
+    const [filter, setFilter] = useState<"all"|"active"|"completed">("all")
+    const {tasks, loading, error, addTask, toggleCompleted, removeTask} = useTasks(query);
 
-    const handleError = (e: unknown) => {
-        if (e instanceof Error) {
-            setError(e.message);
-        } else {
-            setError("Unknown error");
-        }
-    }
+    const isSearching: boolean = query.trim().length >= 3;
 
-    const q: string = query.trim();
-    useEffect(() => {
-        const load = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const data = await getTasks(q);
-                setTasks(data);
-            } catch (e) {
-                handleError(e);
-            } finally {
-                setLoading(false);
+    const visible = (() => {
+        switch (filter) {
+            case "all": {
+                return tasks;
             }
-        };
-
-        load();
-    }, [q]);
-
-    const addTask = async () => {
-        setError(null);
-
-        try {
-            const task: Task = await createTask(title);
-            setTasks(prev => [...prev, task]);
-            setTitle("");
-        } catch (e) {
-            handleError(e);
+            case "active": {
+                return tasks.filter(t => !t.completed);
+            }
+            case "completed": {
+                return tasks.filter(t => t.completed);
+            }
         }
+    })();
+
+    const addTaskUI = async (title: string) => {
+        await addTask(title);
+        setTitle("");
     }
 
-    const complete = async (task: Task) => {
-        setError(null);
-
-        const updated = {
-            ...task,
-            completed: !task.completed
-        };
-
-        try {
-            const upd: Task = await updateTask(updated);
-            setTasks(prev => prev.map(t => t.id === upd.id ? upd : t));
-        } catch (e) {
-            handleError(e);
-        }
-    }
-
-    const removeTask = async (id: number) => {
-        setError(null);
-
+    const removeTaskConfirm = async (id: number) => {
         const deleteConfirm: boolean = confirm("Delete task?");
 
         if (deleteConfirm) {
-            try {
-                await deleteTask(id);
-                setTasks(prev => prev.filter(t => t.id !== id));
-            } catch (e) {
-                handleError(e);
-            }
+            await removeTask(id);
         }
-
     }
 
     return (
@@ -88,6 +46,7 @@ function App() {
                             backdrop-blur">
 
                 {error ? (<p className="mb-4 rounded-xl bg-red-500/10 text-red-300 ring-1 ring-red-500/20 px-3 py-2 text-sm">There is an error: {error}</p>) : ""}
+
                 <h1 className="text-2xl font-semibold tracking-tight mb-4">Tasks</h1>
 
                 {loading && (<p className="text-zinc-400 text-sm mb-3">Loading...</p>)}
@@ -97,17 +56,22 @@ function App() {
                 onQueryChange={setQuery}
                 />
 
+                <TaskFilter
+                    filter={filter}
+                    onChange={setFilter}
+                />
+
                 <TaskForm
                     title={title}
                     onTitleChange={setTitle}
-                    onSubmit={addTask}
+                    onSubmit={addTaskUI}
                 />
 
                 <TaskList
-                    tasks={tasks}
-                    query={q}
-                    onToggle={complete}
-                    onDelete={removeTask}
+                    tasks={visible}
+                    isSearching={isSearching}
+                    onToggle={toggleCompleted}
+                    onDelete={removeTaskConfirm}
                 />
 
             </div>
