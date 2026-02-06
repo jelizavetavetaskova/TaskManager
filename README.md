@@ -35,6 +35,8 @@ A simple full-stack task manager built to practice how a React frontend communic
 
 ## Screenshots
 ![img.png](img.png)
+<img width="532" height="459" alt="image" src="https://github.com/user-attachments/assets/6699b3e6-38e0-48af-bba2-ae84173e38fb" />
+
 
 ## Notes
 This project was built as a learning project to understand React state management, useEffect, and interaction with a Spring Boot REST API.
