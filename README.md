@@ -24,13 +24,13 @@ A simple full-stack task manager built to practice how a React frontend communic
 ## 🚀 Getting Started
 
 ### Backend
-cd backend/taskmanager
+cd backend/taskmanager\n
 ./mvnw spring-boot:run
 
 ### Frontend
-cd frontend
-npm install
-npm run dev
+cd frontend\n
+npm install\n
+npm run dev\n
 Open http://localhost:5173 in your browser.
 
 ## Screenshots
