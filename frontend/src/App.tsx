@@ -18,6 +18,7 @@ function App() {
         setLoading(true);
         setError(null);
         try {
+            await new Promise()
             getTasks(q).then(data => setTasks(data))
         } catch (e) {
             if (e instanceof Error) {
