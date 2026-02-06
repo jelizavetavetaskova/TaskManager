@@ -18,7 +18,6 @@ function App() {
         setLoading(true);
         setError(null);
         try {
-            await new Promise()
             getTasks(q).then(data => setTasks(data))
         } catch (e) {
             if (e instanceof Error) {
@@ -97,7 +96,7 @@ function App() {
                 {error ? (<p className="mb-4 rounded-xl bg-red-500/10 text-red-300 ring-1 ring-red-500/20 px-3 py-2 text-sm">There is an error: {error}</p>) : ""}
                 <h1 className="text-2xl font-semibold tracking-tight mb-4">Tasks</h1>
 
-                {loading ? (<p>Loading...</p>) :
+                {loading ? (<p className="text-zinc-400 text-sm mb-3">Loading...</p>) :
                     (
                         <div>
                             <SearchBar
