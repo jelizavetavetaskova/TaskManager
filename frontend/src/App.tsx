@@ -11,13 +11,29 @@ function App() {
     const [title, setTitle] = useState("");
     const [query, setQuery] = useState("");
     const [error, setError] = useState<string|null>(null);
+    const [loading, setLoading] = useState(false);
 
     const q: string = query.trim();
     useEffect(() => {
-        getTasks(q).then(data => setTasks(data)).catch(e => setError(e.message));
+        setLoading(true);
+        setError(null);
+        try {
+            getTasks(q).then(data => setTasks(data))
+        } catch (e) {
+            if (e instanceof Error) {
+                setError(e.message);
+            }
+            else {
+                setError("Unknown error");
+            }
+        } finally {
+            setLoading(false);
+        }
     }, [q]);
 
     const addTask = async () => {
+        setError(null);
+
         try {
             const task: Task = await createTask(title);
             setTasks(prev => [...prev, task]);
@@ -32,6 +48,8 @@ function App() {
     }
 
     const complete = async (task: Task) => {
+        setError(null);
+
         const updated = {
             ...task,
             completed: !task.completed
@@ -51,6 +69,8 @@ function App() {
     }
 
     const removeTask = async (id: number) => {
+        setError(null);
+
         const deleteConfirm: boolean = confirm("Delete task?");
 
         if (deleteConfirm) {
@@ -73,27 +93,32 @@ function App() {
             <div className="w-full max-w-md rounded-2xl bg-zinc-900/60 p-6 shadow-lg ring-1 ring-zinc-800
                             backdrop-blur">
 
-                {error ? (<p>There is an error: {error}</p>) : ""}
-
+                {error ? (<p className="mb-4 rounded-xl bg-red-500/10 text-red-300 ring-1 ring-red-500/20 px-3 py-2 text-sm">There is an error: {error}</p>) : ""}
                 <h1 className="text-2xl font-semibold tracking-tight mb-4">Tasks</h1>
 
-                <SearchBar
-                    query={query}
-                    onQueryChange={setQuery}
-                />
+                {loading ? (<p>Loading...</p>) :
+                    (
+                        <div>
+                            <SearchBar
+                            query={query}
+                            onQueryChange={setQuery}
+                            />
 
-                <TaskForm
-                    title={title}
-                    onTitleChange={setTitle}
-                    onSubmit={addTask}
-                />
+                            <TaskForm
+                                title={title}
+                                onTitleChange={setTitle}
+                                onSubmit={addTask}
+                            />
 
-                <TaskList
-                    tasks={tasks}
-                    query={query}
-                    onToggle={complete}
-                    onDelete={removeTask}
-                />
+                            <TaskList
+                                tasks={tasks}
+                                query={q}
+                                onToggle={complete}
+                                onDelete={removeTask}
+                            />
+                        </div>
+                    )}
+
             </div>
     )
 }
